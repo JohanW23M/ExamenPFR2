@@ -73,3 +73,4 @@ def encontrarMayorVariacion(listaCiudades: List[Ciudad]): Unit = {
 
 // Ejecución de la función
 encontrarMayorVariacion(ciudades)
+

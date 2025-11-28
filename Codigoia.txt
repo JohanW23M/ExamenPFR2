@@ -1,0 +1,75 @@
+case class Ciudad(nombre: String, temps: List[Double])
+
+val ciudades: List[Ciudad] = List(
+  Ciudad("Loja", List(18.0, 19.2, 17.5, 20.1, 21.0, 18.7, 19.3)),
+  Ciudad("Quito", List(12.5, 13.2, 14.1, 13.8, 14.0, 13.4, 12.9)),
+  Ciudad("Cuenca", List(15.5, 16.3, 15.1, 17.0, 16.8, 15.9, 16.0)),
+  Ciudad("Guayaquil", List(25.0, 26.5, 27.1, 28.3, 29.0, 28.5, 27.8)),
+  Ciudad("Manta", List(23.5, 24.0, 25.1, 25.0, 24.8, 24.9, 23.9)),
+  Ciudad("Tulcán", List( 9.5, 10.2, 11.0, 10.8, 10.9, 10.5, 9.9)),
+  Ciudad("Tena", List(20.5, 21.0, 22.1, 23.0, 22.7, 21.9, 21.5)),
+  Ciudad("Zamora", List(19.0, 20.1, 21.0, 22.3, 22.0, 21.4, 20.7)),
+  Ciudad("Ibarra", List(14.0, 14.5, 15.2, 15.1, 14.8, 14.3, 13.9)),
+  Ciudad("Latacunga", List(13.5, 14.1, 14.7, 14.8, 14.4, 14.0, 13.6)),
+  Ciudad("Machala", List(24.5, 25.0, 25.8, 26.2, 26.5, 26.0, 25.7)),
+  Ciudad("Portoviejo", List(23.8, 24.2, 24.9, 25.3, 25.6, 25.1, 24.7)),
+  Ciudad("Esmeraldas", List(26.0, 26.5, 27.0, 27.8, 28.2, 27.9, 27.1)),
+  Ciudad("Ambato", List(12.8, 13.3, 13.9, 14.1, 13.7, 13.4, 13.0)),
+  Ciudad("Riobamba", List(11.5, 12.1, 12.8, 13.0, 12.7, 12.3, 11.9)),
+  Ciudad("Quevedo", List(24.0, 24.7, 25.3, 25.9, 26.1, 25.8, 25.2)),
+  Ciudad("Santo Domingo", List(23.2, 23.9, 24.5, 25.0, 25.3, 24.9, 24.4)),
+  Ciudad("Salinas", List(22.0, 22.5, 23.0, 23.4, 23.6, 23.1, 22.7)),
+  Ciudad("Macas", List(17.2, 18.0, 17.8, 18.5, 18.9, 18.3, 17.9)),
+  Ciudad("Puyo", List(21.0, 21.6, 22.2, 22.9, 23.1, 22.7, 22.0))
+)
+
+// ❌ ERROR CORREGIDO: Usaste 'Int' como tipo de retorno. ¡Incorrecto! 
+// La función solo realiza una impresión (efecto secundario) y no devuelve un valor numérico útil.
+// ✅ CORRECCIÓN: Se utiliza 'Unit', que es el tipo de dato que indica que no se devuelve ningún valor significativo.
+def encontrarMayorVariacion(listaCiudades: List[Ciudad]): Unit = {
+  // ❌ ERROR CORREGIDO: Usaste el filtro (_.temps.size < 5). ¡Incorrecto! 
+  // Esto seleccionaba las ciudades con MENOS de 5 mediciones, cuando el requisito era al menos 5.
+  // ✅ CORRECCIÓN: Se usa `>= 5` para incluir solo ciudades con 5 o más mediciones válidas.
+  val ciudadesValidas: List[Ciudad] = listaCiudades.filter(_.temps.size >= 5)
+
+  if (ciudadesValidas.isEmpty) {
+    println("No hay ciudades con al menos 5 mediciones válidas para el análisis.")
+    return
+  }
+
+  val variaciones: List[(String, Double)] = ciudadesValidas.map { ciudad =>
+    val maxTemp = ciudad.temps.max
+    val minTemp = ciudad.temps.min
+
+    // ❌ ERROR CORREGIDO: Usaste la operación 'maxTemp + minTemp'. ¡Incorrecto!
+    // Esto calcula la suma de temperaturas, no la variación (rango).
+    // ✅ CORRECCIÓN: Se utiliza la resta 'maxTemp - minTemp' para calcular la variación térmica correcta.
+    val variacion = maxTemp - minTemp
+    (ciudad.nombre, variacion)
+  }
+
+  // El acumulador inicial es ("", -1.0) para el foldLeft que busca el máximo.
+  val resultadoFinal: (String, Double) = variaciones.foldLeft(("", -1.0)) {
+    (acumulador, actual) =>
+      val variacionAcumulada = acumulador._2
+      val variacionActual = actual._2
+
+      // ❌ ERROR CORREGIDO: Usaste la condición 'variacionActual < variacionAcumulada'. ¡Incorrecto!
+      // Esa condición encuentra el valor MÍNIMO.
+      // ✅ CORRECCIÓN: Se usa '>' para asegurar que solo se actualice el acumulador si la variación actual es MAYOR a la acumulada.
+      if (variacionActual > variacionAcumulada) actual else acumulador
+  }
+
+  val (ciudadMayorVariacion, valorMayorVariacion) = resultadoFinal
+
+  // ❌ ERROR CORREGIDO: Usaste 'BigDecimal(valorMayorVariacion.toString())'. ¡Innecesario!
+  // El valor ya era un Double, y forzarlo a String y luego a BigDecimal es ineficiente.
+  // ✅ CORRECCIÓN: Se pasa directamente el 'Double' a 'BigDecimal'.
+  val variacionFormateada = BigDecimal(valorMayorVariacion).setScale(2, BigDecimal.RoundingMode.HALF_UP)
+
+  println(s"La ciudad con la MAYOR VARIACIÓN TÉRMICA es: ${ciudadMayorVariacion}")
+  println(s"Valor de la Variación: ${variacionFormateada} °C")
+}
+
+// Ejecución de la función
+encontrarMayorVariacion(ciudades)
